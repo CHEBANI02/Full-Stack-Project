@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #fff;
+        }
+
+        #result {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            color: #333;
+            transition: transform 0.3s ease;
+        }
+
+        #result.highlight {
+            background-color: #f0f8ff;
+            transition: background-color 0.5s ease;
+        }
+
+        #result:hover {
+            transform: scale(1.05);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .bold-text {
+            font-weight: bold;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 200px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            border-color: #6e8efb;
+            box-shadow: 0 0 8px rgba(110, 142, 251, 0.5);
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        #calculateButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #calculateButton:hover {
+            background-color: #45a049;
+        }
+
+        #clearButton {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #clearButton:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div id="result">
+        <h1>Grade Calculator</h1>
+       
+        <select id="semesterList">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+        </select><br>
+     
+        <p>Enter Marks for 5 Subjects (out of 100):</p>
+        <input type="number" id="subject1" name="subject1" placeholder="Subject 1"><br>
+        <input type="number" id="subject2" name="subject2" placeholder="Subject 2"><br>
+        <input type="number" id="subject3" name="subject3" placeholder="Subject 3"><br>
+        <input type="number" id="subject4" name="subject4" placeholder="Subject 4"><br>
+        <input type="number" id="subject5" name="subject5" placeholder="Subject 5"><br>
+        <input type="text" id="registrationNumber" placeholder="Registration Number"><br>
+        <button id="calculateButton" onclick="calculateGrade()">Calculate</button>
+        <button id="clearButton" onclick="clearInputs()">Clear</button><br>
+        <p>Semester: <span id="selectedSemester"></span></p> 
+        <p>Registration Number: <span id="regNumber"></span></p>
+        <p>GPA: <span id="gpa"></span></p>
+        <p>Grade: <span id="grade"></span></p>
+    </div>
+
+    <script>
+        function calculateGrade() {
+            const semester = document.getElementById('semesterList').value;
+            const subjects = [];
+            for (let i = 1; i <= 5; i++) {
+                subjects.push(document.getElementById(`subject${i}`).value);
+            }
+            const regNumber = document.getElementById('registrationNumber').value;
+
+            fetch('/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ semester: semester, subjects: subjects, registrationNumber: regNumber })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('selectedSemester').innerText = `Semester ${data.semester}`; // Display selected semester
+                document.getElementById('regNumber').innerText = data.registrationNumber;
+                document.getElementById('gpa').innerText = data.gpa;
+                document.getElementById('grade').innerText = data.grade;
+                document.getElementById('result').classList.add('highlight');
+                document.getElementById('gpa').classList.add('bold-text');
+                document.getElementById('grade').classList.add('bold-text');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request. Please try again.');
+            });
+        }
+
+        function clearInputs() {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`subject${i}`).value = '';
+            }
+            document.getElementById('registrationNumber').value = '';
+            document.getElementById('regNumber').innerText = '';
+            document.getElementById('gpa').innerText = '';
+            document.getElementById('grade').innerText = '';
+            document.getElementById('selectedSemester').innerText = ''; 
+            document.getElementById('result').classList.remove('highlight');
+            document.getElementById('gpa').classList.remove('bold-text');
+            document.getElementById('grade').classList.remove('bold-text');
+        }
+    </script>
+</body>
+</html>
