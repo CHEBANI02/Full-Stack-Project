@@ -1,0 +1,13 @@
+.discipline {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #ffe4b5; /* Moccasin color */
+  border-radius: 12px;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Larger shadow */
+  font-size: 20px;
+  font-weight: bold;
+  color: #555; /* Slightly darker text color */
+  width: 400px; /* Fixed width */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto;
+}

@@ -1,0 +1,13 @@
+.student {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f0f8ff; /* Light blue background */
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly larger shadow */
+  font-size: 18px;
+  font-weight: bold;
+  color: #333; /* Darker text color */
+  width: 300px; /* Fixed width */
+  margin-left: auto; /* Center horizontally */
+  margin-right: auto;
+}
