@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Product Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h2>Food Product Management</h2>
+    <div class="menu">
+        <button type="button" onclick="showForm('createform')" class="menuButton" title="Create a new product">
+            <i class="fas fa-plus-circle"></i> Create Product
+        </button>
+        <button type="button" onclick="showForm('getform')" class="menuButton" title="Get product details">
+            <i class="fas fa-search"></i> Get Product Details
+        </button>
+        <button type="button" onclick="showForm('editform')" class="menuButton" title="Edit an existing product">
+            <i class="fas fa-edit"></i> Edit Product
+        </button>
+        <button type="button" onclick="showForm('deleteform')" class="menuButton" title="Delete a product">
+            <i class="fas fa-trash-alt"></i> Delete Product
+        </button>
+    </div>
+    
+    <div class="form-container createform" style="display:none;">
+        <h3>Create Product - POST Request</h3>
+        <input type="text" placeholder="Product Name" class="namecreate inpel"><br>
+        <input type="text" placeholder="Category" class="categorycreate inpel"><br>
+        <input type="number" placeholder="Price" class="pricecreate inpel"><br>
+        <button type="button" onclick="createProduct()" class="createButt Button">
+            <i class="fas fa-check"></i> Create Product
+        </button>
+        <p class="post-result result"></p>
+    </div>
+    
+    <div class="form-container getform" style="display:none;">
+        <h3>Get Product Details - GET Request</h3>
+        <input type="text" placeholder="Product Name" class="nameget inpel"><br>
+        <button type="button" onclick="getProductDetails()" class="getButt Button">
+            <i class="fas fa-search"></i> Get Details
+        </button>
+        <p class="search-result result"></p>
+    </div>
+    
+    <div class="form-container editform" style="display:none;">
+        <h3>Edit Product - PUT Request</h3>
+        <input type="text" placeholder="Product Name" class="editproduct inpel"><br>
+        <button type="button" onclick="getProductToEdit()" class="getdet Button">
+            <i class="fas fa-search"></i> Find Product
+        </button>
+        <p class="edit-result result"></p>
+        <input type="text" placeholder="Category" class="editcategory inpel"><br>
+        <input type="number" placeholder="Price" class="editprice inpel"><br>
+        <button type="button" onclick="saveChanges()" class="editButt Button">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+        <p class="edit-2 result"></p>
+    </div>
+    
+    <div class="form-container deleteform" style="display:none;">
+        <h3>Delete Product - DELETE Request</h3>
+        <input type="text" placeholder="Product Name" class="delproduct inpel"><br>
+        <button type="button" onclick="deleteProduct()" class="delButt Button">
+            <i class="fas fa-trash-alt"></i> Delete Product
+        </button>
+        <p class="delete-result result"></p>
+    </div>
+
+    <!-- The Modal -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p class="modal-body"></p>
+        </div>
+    </div>
+    
+    <script>
+        function showForm(formClass) {
+            document.querySelectorAll('.form-container').forEach(form => form.style.display = 'none');
+            document.querySelector(`.${formClass}`).style.display = 'block';
+        }
+
+        async function createProduct() {
+            const name = document.querySelector('.nameget').value;
+            const response = await fetch(`http://localhost:3005/getproduct/products/${name}`);
+
+            if (response.ok) {
+                const result = await response.json();
+                showModal(JSON.stringify(result));
+            } else {
+                showModal('Error fetching product details');
+            }
+        }
+
+        async function getProductToEdit() {
+            const name = document.querySelector('.editproduct').value;
+            const response = await fetch(`http://localhost:3005/getproductdetails/products/${name}`);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result);
+                if (result) {
+                    document.querySelector('.editcategory').value = result.category;
+                    document.querySelector('.editprice').value = result.price;
+                } else {
+                    document.querySelector('.edit-result').innerHTML = 'Missing data fields';
+                }
+            } else {
+                showModal('Error finding details');
+            }
+        }
+
+        async function saveChanges() {
+            const name = document.querySelector('.editproduct').value;
+            const category = document.querySelector('.editcategory').value;
+            const price = parseFloat(document.querySelector('.editprice').value);
+
+            const updatedProduct = { category, price };
+
+            const response = await fetch(`http://localhost:3005/updateproduct/products/${name}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedProduct)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showModal(result.message || result);
+            } else {
+                showModal('Error updating details');
+            }
+        }
+
+        async function deleteProduct() {
+            const name = document.querySelector('.delproduct').value;
+            const response = await fetch(`http://localhost:3005/deleteproduct/products/${name}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showModal(result.message || result);
+            } else {
+                showModal('Error deleting product');
+            }
+        }
+
+        // Modal handling
+        const modal = document.getElementById("resultModal");
+        const span = document.getElementsByClassName("close")[0];
+
+        function showModal(message) {
+            document.querySelector('.modal-body').innerText = message;
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
+
